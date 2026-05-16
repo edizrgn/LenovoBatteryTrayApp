@@ -1,0 +1,39 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / ReSharper
+.idea/
+_ReSharper*/
+*.DotSettings.user
+
+# Logs and local runtime files
+*.log
+logs/
+
+# NuGet
+packages/
+*.nupkg
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# Do not vendor Lenovo Vantage binaries
+*.dll
+*.pdb
+*.exe
+!App.config

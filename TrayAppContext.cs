@@ -15,8 +15,11 @@ namespace LenovoBatteryTray
         private readonly ToolStripMenuItem storageMenuItem;
         private readonly ToolStripMenuItem quickMenuItem;
         private readonly ToolStripMenuItem startupMenuItem;
+        private readonly ToolStripMenuItem refreshMenuItem;
+        private readonly ToolStripMenuItem exitMenuItem;
 
         private LenovoBatteryMode currentMode = LenovoBatteryMode.Unknown;
+        private Icon currentTrayIcon;
 
         public TrayAppContext(IBatteryModeController controller)
         {
@@ -28,26 +31,29 @@ namespace LenovoBatteryTray
             this.controller = controller;
             startupManager = new StartupManager("LenovoBatteryTray");
 
-            normalMenuItem = new ToolStripMenuItem("Normal / Full Şarj", null, (sender, args) => SetMode(LenovoBatteryMode.Normal));
-            storageMenuItem = new ToolStripMenuItem("Pil Koruma / Tasarruf", null, (sender, args) => SetMode(LenovoBatteryMode.Storage));
-            quickMenuItem = new ToolStripMenuItem("Hızlı Şarj", null, (sender, args) => SetMode(LenovoBatteryMode.Quick));
-            startupMenuItem = new ToolStripMenuItem("Windows ile başlat", null, (sender, args) => ToggleStartup());
+            normalMenuItem = new ToolStripMenuItem("Normal / Full Şarj", TrayIconFactory.CreateMenuImage(LenovoBatteryMode.Normal), (sender, args) => SetMode(LenovoBatteryMode.Normal));
+            storageMenuItem = new ToolStripMenuItem("Pil Koruma / Tasarruf", TrayIconFactory.CreateMenuImage(LenovoBatteryMode.Storage), (sender, args) => SetMode(LenovoBatteryMode.Storage));
+            quickMenuItem = new ToolStripMenuItem("Hızlı Şarj", TrayIconFactory.CreateMenuImage(LenovoBatteryMode.Quick), (sender, args) => SetMode(LenovoBatteryMode.Quick));
+            refreshMenuItem = new ToolStripMenuItem("Durumu Yenile", TrayIconFactory.CreateRefreshImage(), (sender, args) => RefreshMode(true));
+            startupMenuItem = new ToolStripMenuItem("Windows ile başlat", TrayIconFactory.CreateStartupImage(), (sender, args) => ToggleStartup());
+            exitMenuItem = new ToolStripMenuItem("Çıkış", TrayIconFactory.CreateExitImage(), (sender, args) => ExitApplication());
 
             var menu = new ContextMenuStrip();
             menu.Items.Add(normalMenuItem);
             menu.Items.Add(storageMenuItem);
             menu.Items.Add(quickMenuItem);
             menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add(new ToolStripMenuItem("Durumu Yenile", null, (sender, args) => RefreshMode(true)));
+            menu.Items.Add(refreshMenuItem);
             menu.Items.Add(startupMenuItem);
             menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add(new ToolStripMenuItem("Çıkış", null, (sender, args) => ExitApplication()));
+            menu.Items.Add(exitMenuItem);
             menu.Opening += (sender, args) => UpdateMenuState();
 
+            currentTrayIcon = TrayIconFactory.CreateIcon(currentMode);
             notifyIcon = new NotifyIcon
             {
                 ContextMenuStrip = menu,
-                Icon = SystemIcons.Application,
+                Icon = currentTrayIcon,
                 Text = "Lenovo Battery: Bilinmiyor",
                 Visible = true
             };
@@ -123,6 +129,21 @@ namespace LenovoBatteryTray
             quickMenuItem.Checked = currentMode == LenovoBatteryMode.Quick;
             startupMenuItem.Checked = startupManager.IsEnabled();
             notifyIcon.Text = TrimTooltip("Lenovo Battery: " + GetDisplayName(currentMode));
+            UpdateTrayIcon();
+        }
+
+        private void UpdateTrayIcon()
+        {
+            var nextIcon = TrayIconFactory.CreateIcon(currentMode);
+            var previousIcon = currentTrayIcon;
+
+            currentTrayIcon = nextIcon;
+            notifyIcon.Icon = nextIcon;
+
+            if (previousIcon != null)
+            {
+                previousIcon.Dispose();
+            }
         }
 
         private static string GetDisplayName(LenovoBatteryMode mode)
@@ -173,6 +194,11 @@ namespace LenovoBatteryTray
                 if (notifyIcon != null)
                 {
                     notifyIcon.Dispose();
+                }
+
+                if (currentTrayIcon != null)
+                {
+                    currentTrayIcon.Dispose();
                 }
             }
 

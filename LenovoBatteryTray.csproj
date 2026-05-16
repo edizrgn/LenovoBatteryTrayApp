@@ -8,6 +8,7 @@
     <RootNamespace>LenovoBatteryTray</RootNamespace>
     <AssemblyName>LenovoBatteryTray</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <ApplicationIcon>Assets\LenovoBatteryTray.ico</ApplicationIcon>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
@@ -51,9 +52,11 @@
     <Compile Include="Utilities\ExceptionFormatter.cs" />
     <Compile Include="Utilities\SingleInstance.cs" />
     <Compile Include="Utilities\StartupManager.cs" />
+    <Compile Include="Utilities\TrayIconFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Content Include="Assets\LenovoBatteryTray.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -16,6 +16,9 @@ namespace LenovoBatteryTray
         private readonly ToolStripMenuItem quickMenuItem;
         private readonly ToolStripMenuItem startupMenuItem;
         private readonly ToolStripMenuItem refreshMenuItem;
+        private readonly ToolStripMenuItem languageMenuItem;
+        private readonly ToolStripMenuItem englishMenuItem;
+        private readonly ToolStripMenuItem turkishMenuItem;
         private readonly ToolStripMenuItem exitMenuItem;
 
         private LenovoBatteryMode currentMode = LenovoBatteryMode.Unknown;
@@ -31,12 +34,18 @@ namespace LenovoBatteryTray
             this.controller = controller;
             startupManager = new StartupManager("LenovoBatteryTray");
 
-            normalMenuItem = new ToolStripMenuItem("Normal / Full Şarj", TrayIconFactory.CreateMenuImage(LenovoBatteryMode.Normal), (sender, args) => SetMode(LenovoBatteryMode.Normal));
-            storageMenuItem = new ToolStripMenuItem("Pil Koruma / Tasarruf", TrayIconFactory.CreateMenuImage(LenovoBatteryMode.Storage), (sender, args) => SetMode(LenovoBatteryMode.Storage));
-            quickMenuItem = new ToolStripMenuItem("Hızlı Şarj", TrayIconFactory.CreateMenuImage(LenovoBatteryMode.Quick), (sender, args) => SetMode(LenovoBatteryMode.Quick));
-            refreshMenuItem = new ToolStripMenuItem("Durumu Yenile", TrayIconFactory.CreateRefreshImage(), (sender, args) => RefreshMode(true));
-            startupMenuItem = new ToolStripMenuItem("Windows ile başlat", TrayIconFactory.CreateStartupImage(), (sender, args) => ToggleStartup());
-            exitMenuItem = new ToolStripMenuItem("Çıkış", TrayIconFactory.CreateExitImage(), (sender, args) => ExitApplication());
+            normalMenuItem = new ToolStripMenuItem(string.Empty, TrayIconFactory.CreateMenuImage(LenovoBatteryMode.Normal), (sender, args) => SetMode(LenovoBatteryMode.Normal));
+            storageMenuItem = new ToolStripMenuItem(string.Empty, TrayIconFactory.CreateMenuImage(LenovoBatteryMode.Storage), (sender, args) => SetMode(LenovoBatteryMode.Storage));
+            quickMenuItem = new ToolStripMenuItem(string.Empty, TrayIconFactory.CreateMenuImage(LenovoBatteryMode.Quick), (sender, args) => SetMode(LenovoBatteryMode.Quick));
+            refreshMenuItem = new ToolStripMenuItem(string.Empty, TrayIconFactory.CreateRefreshImage(), (sender, args) => RefreshMode(true));
+            startupMenuItem = new ToolStripMenuItem(string.Empty, TrayIconFactory.CreateStartupImage(), (sender, args) => ToggleStartup());
+            languageMenuItem = new ToolStripMenuItem(string.Empty, TrayIconFactory.CreateLanguageImage());
+            englishMenuItem = new ToolStripMenuItem(string.Empty, null, (sender, args) => ChangeLanguage(AppLanguage.English));
+            turkishMenuItem = new ToolStripMenuItem(string.Empty, null, (sender, args) => ChangeLanguage(AppLanguage.Turkish));
+            exitMenuItem = new ToolStripMenuItem(string.Empty, TrayIconFactory.CreateExitImage(), (sender, args) => ExitApplication());
+
+            languageMenuItem.DropDownItems.Add(englishMenuItem);
+            languageMenuItem.DropDownItems.Add(turkishMenuItem);
 
             var menu = new ContextMenuStrip();
             menu.Items.Add(normalMenuItem);
@@ -45,6 +54,7 @@ namespace LenovoBatteryTray
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(refreshMenuItem);
             menu.Items.Add(startupMenuItem);
+            menu.Items.Add(languageMenuItem);
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(exitMenuItem);
             menu.Opening += (sender, args) => UpdateMenuState();
@@ -54,10 +64,11 @@ namespace LenovoBatteryTray
             {
                 ContextMenuStrip = menu,
                 Icon = currentTrayIcon,
-                Text = "Lenovo Battery: Bilinmiyor",
+                Text = TrimTooltip(LocalizationManager.Format("Tooltip", LocalizationManager.ModeName(currentMode))),
                 Visible = true
             };
 
+            ApplyLanguageTexts();
             RefreshMode(true);
         }
 
@@ -74,12 +85,12 @@ namespace LenovoBatteryTray
                 notifyIcon.ShowBalloonTip(
                     2500,
                     "Lenovo Battery",
-                    "Mod ayarlandı: " + GetDisplayName(currentMode),
+                    LocalizationManager.Format("Balloon.ModeChanged", LocalizationManager.ModeName(currentMode)),
                     ToolTipIcon.Info);
             }
             catch (Exception ex)
             {
-                HandleError("Pil modu değiştirilemedi.", ex);
+                HandleError(LocalizationManager.Text("Error.SetModeFailed"), ex);
             }
         }
 
@@ -98,11 +109,11 @@ namespace LenovoBatteryTray
 
                 if (showErrors)
                 {
-                    HandleError("Pil modu okunamadı.", ex);
+                    HandleError(LocalizationManager.Text("Error.ReadModeFailed"), ex);
                 }
                 else
                 {
-                    AppLogger.Error("Pil modu okunamadı.", ex);
+                    AppLogger.Error(LocalizationManager.Text("Error.ReadModeFailed"), ex);
                 }
             }
         }
@@ -118,8 +129,28 @@ namespace LenovoBatteryTray
             }
             catch (Exception ex)
             {
-                HandleError("Windows ile başlat ayarı değiştirilemedi.", ex);
+                HandleError(LocalizationManager.Text("Error.StartupFailed"), ex);
             }
+        }
+
+        private void ChangeLanguage(AppLanguage language)
+        {
+            LocalizationManager.SetLanguage(language);
+            ApplyLanguageTexts();
+            UpdateMenuState();
+        }
+
+        private void ApplyLanguageTexts()
+        {
+            normalMenuItem.Text = LocalizationManager.Text("Menu.Normal");
+            storageMenuItem.Text = LocalizationManager.Text("Menu.Storage");
+            quickMenuItem.Text = LocalizationManager.Text("Menu.Quick");
+            refreshMenuItem.Text = LocalizationManager.Text("Menu.Refresh");
+            startupMenuItem.Text = LocalizationManager.Text("Menu.Startup");
+            languageMenuItem.Text = LocalizationManager.Text("Menu.Language");
+            englishMenuItem.Text = LocalizationManager.Text("Menu.English");
+            turkishMenuItem.Text = LocalizationManager.Text("Menu.Turkish");
+            exitMenuItem.Text = LocalizationManager.Text("Menu.Exit");
         }
 
         private void UpdateMenuState()
@@ -128,7 +159,9 @@ namespace LenovoBatteryTray
             storageMenuItem.Checked = currentMode == LenovoBatteryMode.Storage;
             quickMenuItem.Checked = currentMode == LenovoBatteryMode.Quick;
             startupMenuItem.Checked = startupManager.IsEnabled();
-            notifyIcon.Text = TrimTooltip("Lenovo Battery: " + GetDisplayName(currentMode));
+            englishMenuItem.Checked = LocalizationManager.CurrentLanguage == AppLanguage.English;
+            turkishMenuItem.Checked = LocalizationManager.CurrentLanguage == AppLanguage.Turkish;
+            notifyIcon.Text = TrimTooltip(LocalizationManager.Format("Tooltip", LocalizationManager.ModeName(currentMode)));
             UpdateTrayIcon();
         }
 
@@ -143,21 +176,6 @@ namespace LenovoBatteryTray
             if (previousIcon != null)
             {
                 previousIcon.Dispose();
-            }
-        }
-
-        private static string GetDisplayName(LenovoBatteryMode mode)
-        {
-            switch (mode)
-            {
-                case LenovoBatteryMode.Normal:
-                    return "Normal";
-                case LenovoBatteryMode.Storage:
-                    return "Pil Koruma";
-                case LenovoBatteryMode.Quick:
-                    return "Hızlı Şarj";
-                default:
-                    return "Bilinmiyor";
             }
         }
 

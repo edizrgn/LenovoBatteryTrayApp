@@ -11,6 +11,7 @@ namespace LenovoBatteryTray
         private static void Main()
         {
             AppLogger.Initialize();
+            LocalizationManager.Initialize();
 
             using (var singleInstance = new SingleInstance("Local\\LenovoBatteryTray"))
             {
@@ -21,7 +22,7 @@ namespace LenovoBatteryTray
 
                 if (!Environment.Is64BitProcess)
                 {
-                    const string message = "Bu uygulama x64 çalışmalıdır.";
+                    var message = LocalizationManager.Text("Error.RequiresX64");
                     AppLogger.Error(message, null);
                     MessageBox.Show(message, "Lenovo Battery Tray", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;

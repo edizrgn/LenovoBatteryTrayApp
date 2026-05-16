@@ -50,11 +50,11 @@ namespace LenovoBatteryTray.Battery
                 }
                 catch (TargetInvocationException ex)
                 {
-                    throw CreateLenovoException("Lenovo pil modu okunurken hata oluştu.", ex);
+                    throw CreateLenovoException(LocalizationManager.Text("Error.ReadModeInvocation"), ex);
                 }
                 catch (Exception ex)
                 {
-                    throw CreateLenovoException("Lenovo pil modu okunurken hata oluştu.", ex);
+                    throw CreateLenovoException(LocalizationManager.Text("Error.ReadModeInvocation"), ex);
                 }
             }
         }
@@ -63,7 +63,7 @@ namespace LenovoBatteryTray.Battery
         {
             if (mode == LenovoBatteryMode.Unknown)
             {
-                throw new ArgumentException("Unknown modu ayarlanamaz.", "mode");
+                throw new ArgumentException(LocalizationManager.Text("Error.UnknownCannotBeSet"), "mode");
             }
 
             lock (syncRoot)
@@ -87,11 +87,11 @@ namespace LenovoBatteryTray.Battery
                 }
                 catch (TargetInvocationException ex)
                 {
-                    throw CreateLenovoException("Lenovo pil modu değiştirilirken hata oluştu.", ex);
+                    throw CreateLenovoException(LocalizationManager.Text("Error.SetModeInvocation"), ex);
                 }
                 catch (Exception ex)
                 {
-                    throw CreateLenovoException("Lenovo pil modu değiştirilirken hata oluştu.", ex);
+                    throw CreateLenovoException(LocalizationManager.Text("Error.SetModeInvocation"), ex);
                 }
             }
         }
@@ -134,14 +134,14 @@ namespace LenovoBatteryTray.Battery
 
             if (getInstanceMethod == null || getModeMethod == null || setModeMethod == null)
             {
-                throw new InvalidOperationException("BatteryAgent üzerinde gerekli methodlardan biri bulunamadı.");
+                throw new InvalidOperationException(LocalizationManager.Text("Error.MissingAgentMethods"));
             }
 
             agent = getInstanceMethod.Invoke(null, null);
 
             if (agent == null)
             {
-                throw new InvalidOperationException("BatteryAgent.GetInstance null döndürdü.");
+                throw new InvalidOperationException(LocalizationManager.Text("Error.NullAgent"));
             }
 
             initialized = true;

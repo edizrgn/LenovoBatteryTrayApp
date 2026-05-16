@@ -13,7 +13,7 @@ namespace LenovoBatteryTray.Utilities
 
         public static Icon CreateIcon(LenovoBatteryMode mode)
         {
-            using (var bitmap = CreateBatteryBitmap(mode, 32))
+            using (var bitmap = CreateTrayBadgeBitmap(mode, 32))
             {
                 var handle = bitmap.GetHicon();
 
@@ -41,17 +41,61 @@ namespace LenovoBatteryTray.Utilities
             var bitmap = CreateTransparentBitmap(18);
 
             using (var graphics = Graphics.FromImage(bitmap))
-            using (var pen = new Pen(Color.FromArgb(70, 108, 184), 2f))
-            using (var arrowBrush = new SolidBrush(Color.FromArgb(70, 108, 184)))
+            using (var backgroundBrush = new SolidBrush(Color.FromArgb(70, 108, 184)))
+            using (var arrowPen = new Pen(Color.White, 1.9f))
+            using (var arrowBrush = new SolidBrush(Color.White))
             {
                 graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                graphics.DrawArc(pen, 4, 4, 10, 10, 35, 285);
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using (var background = CreateRoundedRectangle(new RectangleF(2, 2, 14, 14), 4))
+                {
+                    graphics.FillPath(backgroundBrush, background);
+                }
+
+                arrowPen.StartCap = LineCap.Round;
+                arrowPen.EndCap = LineCap.Round;
+                arrowPen.LineJoin = LineJoin.Round;
+
+                graphics.DrawLine(arrowPen, 5, 7, 11, 7);
                 graphics.FillPolygon(arrowBrush, new[]
                 {
-                    new Point(13, 3),
-                    new Point(16, 3),
-                    new Point(15, 6)
+                    new Point(11, 4),
+                    new Point(15, 7),
+                    new Point(11, 10)
                 });
+
+                graphics.DrawLine(arrowPen, 13, 11, 7, 11);
+                graphics.FillPolygon(arrowBrush, new[]
+                {
+                    new Point(7, 8),
+                    new Point(3, 11),
+                    new Point(7, 14)
+                });
+            }
+
+            return bitmap;
+        }
+
+        public static Image CreateLanguageImage()
+        {
+            var bitmap = CreateTransparentBitmap(18);
+
+            using (var graphics = Graphics.FromImage(bitmap))
+            using (var backgroundBrush = new SolidBrush(Color.FromArgb(96, 96, 104)))
+            using (var letterBrush = new SolidBrush(Color.White))
+            using (var font = new Font("Segoe UI", 8.5f, FontStyle.Bold, GraphicsUnit.Pixel))
+            using (var format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
+            {
+                graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using (var background = CreateRoundedRectangle(new RectangleF(2, 2, 14, 14), 4))
+                {
+                    graphics.FillPath(backgroundBrush, background);
+                }
+
+                graphics.DrawString("A", font, letterBrush, new RectangleF(2, 2, 14, 14), format);
             }
 
             return bitmap;
@@ -122,6 +166,84 @@ namespace LenovoBatteryTray.Utilities
             }
 
             return bitmap;
+        }
+
+        private static Bitmap CreateTrayBadgeBitmap(LenovoBatteryMode mode, int size)
+        {
+            var bitmap = CreateTransparentBitmap(size);
+            var scale = size / 32f;
+
+            using (var graphics = Graphics.FromImage(bitmap))
+            using (var backgroundBrush = new SolidBrush(GetModeColor(mode)))
+            using (var outlinePen = new Pen(Color.FromArgb(210, 20, 24, 30), Math.Max(1f, 1.8f * scale)))
+            using (var symbolPen = new Pen(Color.White, Math.Max(2.4f, 4.2f * scale)))
+            using (var symbolBrush = new SolidBrush(Color.White))
+            {
+                graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                var badge = new RectangleF(2.5f * scale, 2.5f * scale, 27f * scale, 27f * scale);
+
+                using (var badgePath = CreateRoundedRectangle(badge, 7.5f * scale))
+                {
+                    graphics.FillPath(backgroundBrush, badgePath);
+                    graphics.DrawPath(outlinePen, badgePath);
+                }
+
+                DrawBadgeSymbol(graphics, mode, scale, symbolPen, symbolBrush);
+            }
+
+            return bitmap;
+        }
+
+        private static void DrawBadgeSymbol(Graphics graphics, LenovoBatteryMode mode, float scale, Pen pen, Brush brush)
+        {
+            pen.StartCap = LineCap.Round;
+            pen.EndCap = LineCap.Round;
+            pen.LineJoin = LineJoin.Round;
+
+            switch (mode)
+            {
+                case LenovoBatteryMode.Normal:
+                    graphics.DrawLines(pen, new[]
+                    {
+                        new PointF(9 * scale, 16.5f * scale),
+                        new PointF(14 * scale, 21 * scale),
+                        new PointF(23 * scale, 11 * scale)
+                    });
+                    break;
+                case LenovoBatteryMode.Storage:
+                    using (var path = CreateRoundedRectangle(new RectangleF(10 * scale, 9 * scale, 4.8f * scale, 14 * scale), 1.8f * scale))
+                    {
+                        graphics.FillPath(brush, path);
+                    }
+
+                    using (var path = CreateRoundedRectangle(new RectangleF(17.2f * scale, 9 * scale, 4.8f * scale, 14 * scale), 1.8f * scale))
+                    {
+                        graphics.FillPath(brush, path);
+                    }
+
+                    break;
+                case LenovoBatteryMode.Quick:
+                    graphics.FillPolygon(brush, new[]
+                    {
+                        new PointF(17 * scale, 6.5f * scale),
+                        new PointF(8.5f * scale, 18 * scale),
+                        new PointF(14.5f * scale, 18 * scale),
+                        new PointF(12.2f * scale, 26 * scale),
+                        new PointF(24 * scale, 13.5f * scale),
+                        new PointF(17.8f * scale, 13.5f * scale)
+                    });
+                    break;
+                default:
+                    using (var font = new Font("Segoe UI", 20 * scale, FontStyle.Bold, GraphicsUnit.Pixel))
+                    using (var format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
+                    {
+                        graphics.DrawString("?", font, brush, new RectangleF(0, 0, 32 * scale, 31 * scale), format);
+                    }
+
+                    break;
+            }
         }
 
         private static void DrawModeSymbol(Graphics graphics, LenovoBatteryMode mode, float scale, Pen pen, Brush brush)

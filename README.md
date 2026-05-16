@@ -11,6 +11,7 @@ Lenovo Battery Tray is a small Windows system tray app for quickly switching Len
 - Calls Lenovo Vantage assemblies through reflection; Lenovo DLL files are not copied into this repository or redistributed.
 - Enforces x64 runtime because Lenovo Vantage assemblies can fail under Any CPU / 32-bit execution.
 - Supports current-user Windows startup through `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`.
+- Chooses Turkish or English automatically from the Windows UI language and allows changing language from the tray menu.
 - Writes logs to `%AppData%\LenovoBatteryTray\logs\app.log`.
 
 ## Requirements

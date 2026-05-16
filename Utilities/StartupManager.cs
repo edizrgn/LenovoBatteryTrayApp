@@ -29,7 +29,7 @@ namespace LenovoBatteryTray.Utilities
             {
                 if (key == null)
                 {
-                    throw new InvalidOperationException("Windows Run registry anahtarı açılamadı.");
+                    throw new InvalidOperationException(LocalizationManager.Text("Error.RunKeyOpenFailed"));
                 }
 
                 if (enabled)

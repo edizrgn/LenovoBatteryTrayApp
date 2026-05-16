@@ -49,7 +49,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TrayAppContext.cs" />
     <Compile Include="Utilities\AppLogger.cs" />
+    <Compile Include="Utilities\AppLanguage.cs" />
     <Compile Include="Utilities\ExceptionFormatter.cs" />
+    <Compile Include="Utilities\LocalizationManager.cs" />
     <Compile Include="Utilities\SingleInstance.cs" />
     <Compile Include="Utilities\StartupManager.cs" />
     <Compile Include="Utilities\TrayIconFactory.cs" />

@@ -8,7 +8,7 @@ namespace LenovoBatteryTray.Utilities
         {
             if (exception == null)
             {
-                return "Bilinmeyen hata.";
+                return LocalizationManager.Text("Error.Unknown");
             }
 
             var current = exception;

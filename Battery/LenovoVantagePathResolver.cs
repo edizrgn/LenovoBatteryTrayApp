@@ -20,7 +20,7 @@ namespace LenovoBatteryTray.Battery
 
             if (!Directory.Exists(root))
             {
-                throw new DirectoryNotFoundException("Lenovo Vantage IdeaNotebookAddin DLL’leri bulunamadı. Lenovo Vantage’ın kurulu ve güncel olduğundan emin olun.");
+                throw new DirectoryNotFoundException(LocalizationManager.Text("Error.LenovoDllsNotFound"));
             }
 
             var candidates = Directory.GetDirectories(root)
@@ -30,7 +30,7 @@ namespace LenovoBatteryTray.Battery
 
             if (candidates.Count == 0)
             {
-                throw new DirectoryNotFoundException("Lenovo Vantage IdeaNotebookAddin DLL’leri bulunamadı. Lenovo Vantage’ın kurulu ve güncel olduğundan emin olun.");
+                throw new DirectoryNotFoundException(LocalizationManager.Text("Error.LenovoDllsNotFound"));
             }
 
             Candidate selected;

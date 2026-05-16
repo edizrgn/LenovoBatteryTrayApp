@@ -139,3 +139,7 @@ The app looks for the newest valid `IdeaNotebookAddin` version folder containing
 
 - `BatteryManagementContract.dll`
 - `IdeaBatteryAgent.dll`
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
